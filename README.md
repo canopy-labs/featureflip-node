@@ -1,17 +1,21 @@
-# @featureflip/node-sdk
+# @featureflip/node
 
-Node.js SDK for [Featureflip](https://featureflip.io) - evaluate feature flags locally with near-zero latency. Built on top of `@featureflip/sdk` with Node.js-specific defaults.
+Node.js SDK for [Featureflip](https://featureflip.io) - evaluate feature flags locally with near-zero latency. Built on top of `@featureflip/js` with Node.js-specific defaults.
+
+> Using [OpenFeature](https://openfeature.dev/)? See
+> [`@featureflip/openfeature-node`](https://www.npmjs.com/package/@featureflip/openfeature-node),
+> the Featureflip provider for the OpenFeature Node.js SDK.
 
 ## Installation
 
 ```bash
-npm install @featureflip/node-sdk
+npm install @featureflip/node
 ```
 
 ## Quick Start
 
 ```ts
-import { FeatureflipClient } from '@featureflip/node-sdk';
+import { FeatureflipClient } from '@featureflip/node';
 
 // Blocks until flags are loaded
 const client = await FeatureflipClient.create({
@@ -27,6 +31,15 @@ if (enabled) {
 await client.close();
 ```
 
+Or, obtain a handle synchronously and wait manually:
+
+```ts
+const client = FeatureflipClient.get({ sdkKey: 'your-sdk-key' });
+await client.waitForInitialization();
+```
+
+> **Singleton by construction.** `FeatureflipClient.get()` is the only way to obtain a client — the public constructor was removed in v2.0. Calling `get()` more than once with the same SDK key returns handles pointing at one shared underlying client. The factory is refcounted, so closing a handle only shuts down the shared core when the last handle is closed. This makes the SDK safe to call from per-request handlers and DI containers without leaking SSE connections.
+
 ## Configuration
 
 ```ts
@@ -41,8 +54,6 @@ const client = await FeatureflipClient.create({
   maxStreamRetries: 5,       // SSE retries before falling back to polling
 });
 ```
-
-The SDK key can also be set via the `FEATUREFLIP_SDK_KEY` environment variable.
 
 ## Evaluation
 
@@ -78,7 +89,7 @@ console.log(detail.ruleId);  // Rule ID if reason is "RuleMatch"
 // Track custom events
 client.track('checkout-completed', { user_id: '123' }, { total: 99.99 });
 
-// Identify users for segment building
+// Record an identify event for analytics (does not affect flag evaluation)
 client.identify({ user_id: '123', email: 'user@example.com', plan: 'pro' });
 
 // Force flush pending events
@@ -114,4 +125,4 @@ client.stringVariation('pricing-tier', {}, 'free'); // 'pro'
 
 ## License
 
-MIT
+Apache-2.0

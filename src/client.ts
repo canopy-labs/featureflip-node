@@ -5,6 +5,9 @@ import {
 import type {
   EvaluationContext,
   EvaluationDetail,
+  EvaluationInspector,
+  FeatureflipEvent,
+  FlagUpdateListener,
 } from '@featureflip/js';
 
 export interface NodeFeatureflipConfig {
@@ -16,26 +19,45 @@ export interface NodeFeatureflipConfig {
   flushBatchSize?: number;
   initTimeout?: number;
   maxStreamRetries?: number;
+  /** In-process observers fired on every flag evaluation. */
+  inspectors?: EvaluationInspector[];
 }
 
 const DEFAULT_BASE_URL = 'https://eval.featureflip.io';
 
+/**
+ * Node.js server SDK wrapper around `@featureflip/js`. Instances are obtained
+ * via the static factory `FeatureflipClient.get(config)`; direct instantiation
+ * is not supported. Multiple `get` calls with the same SDK key return handles
+ * sharing one underlying client (refcounted).
+ */
 export class FeatureflipClient {
   private readonly inner: InnerClient;
 
-  constructor(config: NodeFeatureflipConfig) {
-    const platform = createNodePlatform();
-    this.inner = new InnerClient(
+  private constructor(inner: InnerClient) {
+    this.inner = inner;
+  }
+
+  /**
+   * Returns a client for the given SDK key. First call constructs the shared
+   * core; later calls with the same key return handles sharing the core.
+   */
+  static get(config: NodeFeatureflipConfig): FeatureflipClient {
+    const inner = InnerClient.get(
       {
         ...config,
         baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,
       },
-      platform,
+      createNodePlatform(),
     );
+    return new FeatureflipClient(inner);
   }
 
+  /**
+   * Convenience: get a client and wait for initialization before returning it.
+   */
   static async create(config: NodeFeatureflipConfig): Promise<FeatureflipClient> {
-    const client = new FeatureflipClient(config);
+    const client = FeatureflipClient.get(config);
     await client.waitForInitialization();
     return client;
   }
@@ -76,6 +98,21 @@ export class FeatureflipClient {
     this.inner.identify(context);
   }
 
+  /**
+   * Subscribe to flag-configuration updates. The listener receives the keys of
+   * the flags affected by each update, batched into one call. It does not fire
+   * for the initial flag load. Returns an unsubscribe function; listeners are
+   * also dropped when this handle is closed.
+   */
+  on(event: FeatureflipEvent, listener: FlagUpdateListener): () => void {
+    return this.inner.on(event, listener);
+  }
+
+  /** Remove a listener previously registered with {@link on}. */
+  off(event: FeatureflipEvent, listener: FlagUpdateListener): void {
+    this.inner.off(event, listener);
+  }
+
   async flush(): Promise<void> {
     return this.inner.flush();
   }
@@ -85,8 +122,6 @@ export class FeatureflipClient {
   }
 
   static forTesting(flags: Record<string, unknown>): FeatureflipClient {
-    const client = Object.create(FeatureflipClient.prototype) as FeatureflipClient;
-    (client as unknown as { inner: InnerClient }).inner = InnerClient.forTesting(flags);
-    return client;
+    return new FeatureflipClient(InnerClient.forTesting(flags));
   }
 }
