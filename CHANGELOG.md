@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.0 — 2026-09-01
+
+### Fixed
+
+- Picks up the js-sdk 2.9.0 operator-spelling fix through its `@featureflip/js` dependency: a condition operator is now recognised however it is spelled, so `NotEquals`, `notequals`, `NOTEQUALS` and `not_equals` all resolve to the same operator where only the canonical PascalCase label did before. This converges the js, go, ruby and php SDKs on one definition of "recognised operator" — until now a single saved rule could serve different variations to two users purely by which SDK their service ran. No SDK gets stricter, so no configuration that evaluated before stops doing so. See the `@featureflip/js` changelog for the full account. (#2374)
+
 ## 2.8.0 — 2026-08-26
 
 ### Changed
