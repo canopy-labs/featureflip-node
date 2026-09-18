@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.10.0 — 2026-09-18
+
+### Fixed
+
+- Picks up the js-sdk 2.10.0 SSE fallback fix through its `@featureflip/js` dependency. After five consecutive stream failures — about 31 seconds of unreachability — this SDK used to start polling and never retry the stream again, so a long-running Node process lost real-time updates until it restarted and polled `/v1/sdk/flags` forever. Polling is now additive: it covers the outage, the stream keeps retrying underneath, and the next delivered `sync` retires the poller. The same release jitters the reconnect delay and resets the failure counter on a delivered `sync` rather than on `open`. See the `@featureflip/js` changelog for the full account. (#3071)
+
 ## 2.9.0 — 2026-09-01
 
 ### Fixed
