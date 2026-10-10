@@ -1,6 +1,6 @@
 {
   "name": "@featureflip/node",
-  "version": "2.11.0",
+  "version": "2.11.1",
   "description": "Node.js server SDK for Featureflip",
   "keywords": [
     "feature-flags",
@@ -30,6 +30,7 @@
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
