@@ -21,7 +21,20 @@ export interface NodeFeatureflipConfig {
   maxStreamRetries?: number;
   /** In-process observers fired on every flag evaluation. */
   inspectors?: EvaluationInspector[];
+  /**
+   * `name/version` tokens for libraries that wrap this SDK, such as an
+   * OpenFeature provider. Sent in order after this SDK's own
+   * `featureflip-node/<version>` token, so usage through each can be counted.
+   * An invalid token is ignored with a warning.
+   */
+  wrappers?: string[];
 }
+
+/**
+ * Identifies this package to the Evaluation API (#4145). The js SDK sends its own
+ * token first, so requests read `featureflip-js/<v> featureflip-node/<v>`.
+ */
+const NODE_SDK_TOKEN = `featureflip-node/${__NODE_SDK_VERSION__}`;
 
 const DEFAULT_BASE_URL = 'https://eval.featureflip.io';
 
@@ -47,6 +60,7 @@ export class FeatureflipClient {
       {
         ...config,
         baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,
+        wrappers: [NODE_SDK_TOKEN, ...(config.wrappers ?? [])],
       },
       createNodePlatform(),
     );

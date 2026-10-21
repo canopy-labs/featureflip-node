@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.14.0 — 2026-10-20
+
+### Added
+
+- Requests now identify this SDK as well as the js SDK it runs on: `User-Agent: featureflip-js/<version> featureflip-node/<version>`. Before this they carried only `featureflip-js/<version>`, and with the js SDK's version rather than this package's, so Node usage was counted as js usage. Requires `@featureflip/js` 2.13.0 or later, which this release now depends on. (#4145)
+- A `wrappers` option for libraries that wrap this SDK, such as `@featureflip/openfeature-node`. Each `name/version` token is sent after `featureflip-node/<version>`. (#4145)
+
 ## 2.13.0 — 2026-10-20
 
 ### Changed
