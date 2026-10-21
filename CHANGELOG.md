@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.13.0 — 2026-10-20
+
+### Changed
+
+- Republished in lockstep with `@featureflip/js` 2.13.0. This package has no source changes of its own. Because it runs on `@featureflip/js`, its requests now carry the js SDK's `User-Agent: featureflip-js/<version>`; identifying as `featureflip-node` itself is tracked in #4145. Recorded here because the npm release tag publishes all four JavaScript packages at a single version. (#4144)
+
 ## 2.12.0 — 2026-10-20
 
 ### Changed
