@@ -1,6 +1,6 @@
 {
   "name": "@featureflip/node",
-  "version": "2.17.2",
+  "version": "2.18.0",
   "description": "Node.js server SDK for Featureflip",
   "keywords": [
     "feature-flags",
@@ -42,7 +42,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@featureflip/js": "^2.16.0"
+    "@featureflip/js": "^2.18.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.59.4",
