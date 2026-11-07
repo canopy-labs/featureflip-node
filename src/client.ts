@@ -8,6 +8,8 @@ import type {
   EvaluationInspector,
   FeatureflipEvent,
   FlagUpdateListener,
+  SnapshotStore,
+  StartupInfo,
 } from '@featureflip/js';
 
 export interface NodeFeatureflipConfig {
@@ -21,6 +23,31 @@ export interface NodeFeatureflipConfig {
   maxStreamRetries?: number;
   /** In-process observers fired on every flag evaluation. */
   inspectors?: EvaluationInspector[];
+  /**
+   * Opt-in persistence of the last good flag config, so a process that starts
+   * while the Evaluation API is unreachable serves the stored flags instead of
+   * defaults. Use `new FileSnapshotStore(path)` for a file store, or supply any
+   * `{ get(): Promise<string | undefined>; put(text: string): Promise<void> }`.
+   * The store holds opaque text: the SDK writes and checks the envelope itself,
+   * including which SDK key and base URL it belongs to.
+   *
+   * The snapshot contains your targeting rules, including customer attribute
+   * values used in conditions. `FileSnapshotStore` writes owner-only (0600)
+   * files on POSIX systems; protect any other store accordingly. Ephemeral
+   * container disks lose the file on redeploy, so mount a volume if you need
+   * it to survive.
+   *
+   * Honored only on the first `get()` per SDK key (the shared core is built
+   * once, like `inspectors`); a later call with the same key logs a warning
+   * and ignores it.
+   */
+  snapshotStore?: SnapshotStore;
+  /**
+   * Maximum age in seconds of a stored snapshot that may still be served.
+   * Defaults to 86400. Only used with `snapshotStore`, and like it only
+   * honored on the first `get()` per SDK key.
+   */
+  maxSnapshotAgeSeconds?: number;
   /**
    * `name/version` tokens for libraries that wrap this SDK, such as an
    * OpenFeature provider. Sent in order after this SDK's own
@@ -78,6 +105,11 @@ export class FeatureflipClient {
 
   get isInitialized(): boolean {
     return this.inner.isInitialized;
+  }
+
+  /** Where initial flag data came from: `live`, `snapshot` or `none`. */
+  get startupInfo(): StartupInfo {
+    return this.inner.startupInfo;
   }
 
   async waitForInitialization(): Promise<void> {
