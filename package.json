@@ -1,6 +1,6 @@
 {
   "name": "@featureflip/node",
-  "version": "2.19.1",
+  "version": "2.19.2",
   "description": "Node.js server SDK for Featureflip",
   "keywords": [
     "feature-flags",
@@ -42,16 +42,16 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@featureflip/js": "^2.19.0"
+    "@featureflip/js": "^2.19.2"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.60.1",
     "@types/node": "^26.6.6",
     "@typescript/typescript6": "^6.0.2",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "vite-plugin-dts": "^5.1.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": ">=20.19.0"
