@@ -28,7 +28,12 @@ const exportedFiles = (node: unknown): string[] =>
     : Object.entries(node as Record<string, unknown>).flatMap(([key, value]) =>
         key === 'types' ? [] : exportedFiles(value)
       );
-const entryFiles = [...new Set(exportedFiles(pkg.exports))];
+const allEntryFiles = [...new Set(exportedFiles(pkg.exports))];
+// The NestJS subpath is exempt from the probe: it imports @nestjs/common, which loads
+// reflect-metadata and patches Reflect. That is Nest's own doing and only happens for
+// consumers who import this optional entry. The main entry is probed below.
+const isNest = (f: string) => f.startsWith('./dist/nestjs/');
+const entryFiles = allEntryFiles.filter((f) => !isNest(f));
 
 let baseline: unknown;
 beforeAll(() => {
@@ -51,7 +56,12 @@ describe('import-time side effects', () => {
   });
 
   it('covers both module formats', () => {
-    expect([...entryFiles].sort()).toEqual(['./dist/index.cjs', './dist/index.mjs']);
+    expect([...allEntryFiles].sort()).toEqual([
+      './dist/index.cjs',
+      './dist/index.mjs',
+      './dist/nestjs/index.cjs',
+      './dist/nestjs/index.mjs',
+    ]);
   });
 
   it('notices a module that does work at load time', () => {

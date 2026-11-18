@@ -25,11 +25,16 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      // The nestjs entry is a separate subpath (`@featureflip/node/nestjs`) so
+      // the main entry never references @nestjs/common.
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        'nestjs/index': resolve(__dirname, 'src/nestjs/index.ts'),
+      },
       formats: ['es', 'cjs'],
-      fileName: (format) => {
+      fileName: (format, entryName) => {
         const ext = format === 'es' ? 'mjs' : 'cjs';
-        return `index.${ext}`;
+        return `${entryName}.${ext}`;
       },
     },
     rolldownOptions: {
@@ -38,6 +43,11 @@ export default defineConfig({
         'eventsource',
         'crypto',
         'module',
+        // Node built-ins by their node: name. Without this the bundler swaps in an
+        // empty stub, so e.g. createRequire from 'node:module' is undefined at runtime.
+        /^node:/,
+        /^@nestjs\//,
+        'reflect-metadata',
       ],
     },
   },

@@ -112,11 +112,25 @@ client.boolVariation('my-feature', {}, false);     // true
 client.stringVariation('pricing-tier', {}, 'free'); // 'pro'
 ```
 
+## NestJS
+
+```ts
+import { FeatureflipModule } from '@featureflip/node/nestjs';
+
+@Module({
+  imports: [FeatureflipModule.forRoot({ sdkKey: process.env.FEATUREFLIP_SDK_KEY! })],
+})
+export class AppModule {}
+```
+
+The module is global and exposes the client for injection (`constructor(private flags: FeatureflipClient)`). `forRootAsync({ imports, inject, useFactory })` reads the key from `ConfigService`. `@nestjs/common` is an optional peer dependency.
+
 ## Features
 
 - **Local evaluation** - Near-zero latency after initialization
 - **Real-time updates** - SSE streaming with automatic polling fallback
 - **Event tracking** - Automatic batching and background flushing
+- **NestJS module** - `@featureflip/node/nestjs`
 - **Test support** - `forTesting()` factory for deterministic unit tests
 - **TypeScript** - Full type definitions included
 - **Node.js optimized** - Uses native `http` module for SSE and HTTP

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.20.0 — 2026-11-18
+
+### Added
+
+- NestJS module at `@featureflip/node/nestjs`: `FeatureflipModule.forRoot()` and `forRootAsync()` register a global, injectable `FeatureflipClient`, wait for initial flag load before the app starts, and close the client on shutdown. `@nestjs/common` is an optional peer dependency; the main entry never loads it.
+
 ## 2.19.2 — 2026-11-16
 
 ### Security
